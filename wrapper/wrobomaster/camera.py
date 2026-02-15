@@ -17,3 +17,11 @@ class WCamera:
         Stops the Robomaster EP video stream.
         """
         self.camera.stop_video_stream()
+    
+    def unwrap(self):
+        """
+        Gets the underlying Robomaster EP camera object (no wrapper).
+
+        Use this when you need to use functionality not exposed by the wrapper.
+        """
+        return self.camera

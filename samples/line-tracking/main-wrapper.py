@@ -44,7 +44,7 @@ def main():
     ep_robot.connect()
     chassis = ep_robot.get_chassis()
     ep_camera = ep_robot.get_camera()
-    ep_vision = ep_robot.vision
+    ep_vision = ep_robot.unwrap().vision
 
     ep_camera.start_stream()
     vision_result = ep_vision.sub_detect_info(

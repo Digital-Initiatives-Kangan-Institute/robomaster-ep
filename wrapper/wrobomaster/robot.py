@@ -37,3 +37,11 @@ class WRobot:
         Disconnects from the Robomaster EP.
         """
         self.robot.close()
+    
+    def unwrap(self):
+        """
+        Gets the underlying Robomaster EP robot object (no wrapper).
+
+        Use this when you need to use functionality not exposed by the wrapper.
+        """
+        return self.robot

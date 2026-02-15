@@ -16,3 +16,11 @@ class WChassis:
         :type duration: float
         """
         self.chassis.drive_speed(x, y, rotation, duration)
+    
+    def unwrap(self):
+        """
+        Gets the underlying Robomaster EP chassis object (no wrapper).
+
+        Use this when you need to use functionality not exposed by the wrapper.
+        """
+        return self.chassis
