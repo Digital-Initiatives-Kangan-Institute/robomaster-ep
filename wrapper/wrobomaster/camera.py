@@ -29,6 +29,12 @@ class WCamera:
         Stops the Robomaster EP video stream.
         """
         self.camera.stop_video_stream()
+
+    def get_cv2_image(self):
+        """
+        Gets the OpenCV image buffer.
+        """
+        return self.camera.read_cv2_image(strategy="newest", timeout=0.5)
     
     def unwrap(self):
         """

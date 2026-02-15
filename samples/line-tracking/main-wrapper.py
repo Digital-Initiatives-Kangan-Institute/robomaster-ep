@@ -2,13 +2,18 @@ import pygame, math
 
 from wrobomaster import robot, ai
 
-velocity = [0, 0, 0]
+velocity = [0.0, 0.0]
+angle = 0.0
+
 line_detected = False
 line_centered = False
 
+current_line_result = None
+
 
 def on_detect_line(result: ai.LineTrackerResult):
-    global line_detected, line_centered, velocity
+    global line_detected, line_centered, velocity, angle, current_line_result
+    current_line_result = result
 
     line_detected = result.line_detected
     print(f"Line Detected: {line_detected}")
@@ -20,19 +25,22 @@ def on_detect_line(result: ai.LineTrackerResult):
     
     # Check if the line is close to the center point
     theta_abs = math.fabs(line.theta)
-    line_centered = theta_abs < 5.0
+    line_centered = theta_abs < 10.0
 
     if line.x > 0.6:
-        velocity[1] += 1
+        velocity[1] += 0.05
     elif line.x < 0.4:
-        velocity[1] -= 1
-    velocity[2] += int(line.theta * 8)
-    print(f"X: {line.x}, Y: {line.y}, THETA: {line.theta} (ABS: {theta_abs}), CURVE: {line.curvature}")
+        velocity[1] -= 0.05
+
+    if not line_centered:
+        angle += line.theta
+
+    print(f"X: {line.x}, Y: {line.y}, THETA: {line.theta} (ABS: {theta_abs}), CURVE: {line.curvature}, CENTER: {line_centered}")
     print(line.theta)
 
 
 def main():
-    global velocity, line_detected, line_centered
+    global velocity, angle, line_detected, line_centered
     pygame.init()
     screen = pygame.display.set_mode((256, 256))
     clock = pygame.time.Clock()
@@ -56,26 +64,32 @@ def main():
 
         keys = pygame.key.get_pressed()
 
+        # Automated (Line Tracker)
         if line_detected and line_centered:
-            velocity[0] += 1
+            velocity[0] += 0.5
 
+        # Manual
         if keys[pygame.K_UP]:
-            velocity[0] += 1
+            velocity[0] += 1.0
 
         if keys[pygame.K_DOWN]:
-            velocity[0] -= 1
+            velocity[0] -= 1.0
 
         if keys[pygame.K_LEFT]:
-            velocity[2] -= 90
+            angle -= 90
 
         if keys[pygame.K_RIGHT]:
-            velocity[2] += 90
+            angle += 90
 
-        chassis.translate(x=velocity[0], y=velocity[1], rotation=velocity[2], duration=0.1)
-        velocity = [0, 0, 0]
+        chassis.translate(x=velocity[0], y=velocity[1], rotation=angle, duration=0.1)
+
+        # Reset velocity and angle (they have been consumed for this tick)
+        velocity = [0.0, 0.0]
+        angle = 0.0
+
         screen.fill(fill_color)
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(10)
 
     ep_robot.disconnect()
     ep_camera.stop_stream()

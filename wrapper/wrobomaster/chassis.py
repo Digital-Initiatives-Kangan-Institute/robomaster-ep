@@ -2,16 +2,16 @@ class WChassis:
     def __init__(self, chassis):
         self.chassis = chassis
     
-    def translate(self, x: int, y: int, rotation: int, duration: float):
+    def translate(self, x: float, y: float, rotation: float, duration: float):
         """
         Translates the Robomaster EP along the x, y and rotation for a duration.
         
         :param x: The amount to move on the x axis.
-        :type x: int
+        :type x: float
         :param y: The amount to move on the y axis.
-        :type y: int
+        :type y: float
         :param rotation: The amount to rotate in degrees.
-        :type rotation: int
+        :type rotation: float
         :param duration: The duration to translate for.
         :type duration: float
         """
