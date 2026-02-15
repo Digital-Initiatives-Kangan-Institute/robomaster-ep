@@ -6,25 +6,12 @@ velocity = [0, 0, 0]
 line_detected = False
 line_centered = False
 
-def on_detect_line_callback(line_info):
-    global line_detected, line_centered
-    line_type = line_info[0]
-    line_detected = line_type == 1
-    if line_type == 0:
-        return
-    line = line_info[1]
-
-    x = line[0]
-    y = line[1]
-    theta = line[2]
-    curve = line[3]
-
-    
 
 def on_detect_line(result: ai.LineTrackerResult):
     global line_detected, line_centered, velocity
 
     line_detected = result.line_detected
+    print(f"Line Detected: {line_detected}")
 
     if not result.line_detected:
         return
@@ -47,7 +34,7 @@ def on_detect_line(result: ai.LineTrackerResult):
 def main():
     global velocity, line_detected, line_centered
     pygame.init()
-    screen = pygame.display.set_mode((1280, 720))
+    screen = pygame.display.set_mode((256, 256))
     clock = pygame.time.Clock()
     running = True
     fill_color = "purple"
@@ -60,9 +47,6 @@ def main():
     ai = ep_robot.get_ai()
 
     ep_camera.start_stream()
-    # vision_result = ep_vision.sub_detect_info(
-    #     name="line", color="blue", callback=on_detect_line_callback
-    # )
     ai.subscribe_to_line_tracker(on_detect_line, line_color="blue")
 
     while running:

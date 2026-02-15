@@ -25,7 +25,7 @@ class WAI:
         result = LineTrackerResult()
 
         line_type = line_info[0]
-        result.line_detected = line_type == 0
+        result.line_detected = line_type != 0
 
         if result.line_detected:
             for i in range(1, len(line_info)):
