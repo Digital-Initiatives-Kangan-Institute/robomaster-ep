@@ -43,10 +43,10 @@ def main():
     ep_robot = robot.WRobot()
     ep_robot.connect()
     chassis = ep_robot.get_chassis()
-    ep_camera = ep_robot.camera
+    ep_camera = ep_robot.get_camera()
     ep_vision = ep_robot.vision
 
-    ep_camera.start_video_stream(display=True, resolution=camera.STREAM_360P)
+    ep_camera.start_stream()
     vision_result = ep_vision.sub_detect_info(
         name="line", color="blue", callback=on_detect_line_callback
     )
@@ -80,7 +80,7 @@ def main():
         clock.tick(60)
 
     ep_robot.disconnect()
-    ep_camera.stop_video_stream()
+    ep_camera.stop_stream()
     pygame.quit()
 
 
