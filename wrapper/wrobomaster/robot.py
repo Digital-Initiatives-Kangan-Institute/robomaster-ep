@@ -2,6 +2,7 @@ from robomaster import robot
 
 from camera import WCamera
 from chassis import WChassis
+from ai import WAI
 
 class WRobot:
     """
@@ -11,6 +12,7 @@ class WRobot:
         self.robot = robot.Robot()
         self.chassis = WChassis(self.robot.chassis)
         self.camera = WCamera(self.robot.camera)
+        self.ai = WAI(self.robot)
     
     def connect(self):
         """
@@ -28,9 +30,17 @@ class WRobot:
     
     def get_camera(self):
         """
-        Gets the Robotmaster camera module.
+        Gets the Robomaster EP camera module.
         """
         return self.camera
+
+    def get_ai(self):
+        """
+        Gets the Robomaster EP ai module.
+
+        This module contains vision related AI functions.
+        """
+        return self.ai
 
     def disconnect(self):
         """

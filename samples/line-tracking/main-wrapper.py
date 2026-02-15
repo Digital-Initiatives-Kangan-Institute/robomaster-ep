@@ -1,11 +1,10 @@
 import pygame, math
 
-from ...wrapper.wrobomaster import robot
+from wrobomaster import robot, ai
 
 velocity = [0, 0, 0]
 line_detected = False
 line_centered = False
-
 
 def on_detect_line_callback(line_info):
     global line_detected, line_centered
@@ -31,6 +30,10 @@ def on_detect_line_callback(line_info):
     velocity[2] += theta * 8
     print(f"X: {x}, Y: {y}, THETA: {theta} (ABS: {theta_abs}), CURVE: {curve}")
 
+def on_detect_line(result: ai.LineTrackerResult):
+    global line_detected, line_centered
+    line = result.lines[0]
+
 
 def main():
     global velocity, line_detected, line_centered
@@ -45,11 +48,13 @@ def main():
     chassis = ep_robot.get_chassis()
     ep_camera = ep_robot.get_camera()
     ep_vision = ep_robot.unwrap().vision
+    ai = ep_robot.get_ai()
 
     ep_camera.start_stream()
     vision_result = ep_vision.sub_detect_info(
         name="line", color="blue", callback=on_detect_line_callback
     )
+    ai.subscribe_to_line_tracker(on_detect_line, line_color="blue")
 
     while running:
         for event in pygame.event.get():

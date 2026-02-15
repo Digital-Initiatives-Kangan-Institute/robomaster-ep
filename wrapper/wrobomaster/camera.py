@@ -1,7 +1,7 @@
 class WCamera:
     def __init__(self, camera):
         self.camera = camera
-        
+
         self.STREAM_360P = "360p"
         self.STREAM_540P = "540p"
         self.STREAM_720P = "720p"
