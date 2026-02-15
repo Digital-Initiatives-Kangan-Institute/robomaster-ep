@@ -1,14 +1,26 @@
 class WCamera:
     def __init__(self, camera):
         self.camera = camera
-        self.RESOLUTION_360P = self.camera.STREAM_360P
+        
+        self.STREAM_360P = "360p"
+        self.STREAM_540P = "540p"
+        self.STREAM_720P = "720p"
     
-    def start_stream(self, show_window=True, resolution=None):
+    def start_stream(self, show_window=True, resolution="360p"):
         """
-        Starts the Robomaster EP video stream using `RESOLUTION_360P`.
+        Starts the Robomaster EP video stream.
+        
+        :param show_window: 
+            When `true`, shows a window with the stream (`true` by default).
+
+        :param resolution: There are three supported resolutions
+
+            - `360p`
+            - `540p`
+            - `720p`
+
+            If no resolution is provided, `360p` is enabled by default.
         """
-        if resolution == None:
-            resolution = self.RESOLUTION_360P
         
         self.camera.start_video_stream(display=show_window, resolution=resolution)
     
