@@ -1,8 +1,8 @@
 from robomaster import robot
 
-from camera import WCamera
-from chassis import WChassis
-from ai import WAI
+from wrobomaster.camera import WCamera
+from wrobomaster.chassis import WChassis
+from wrobomaster.ai import WAI
 
 class WRobot:
     """
@@ -10,9 +10,9 @@ class WRobot:
     """
     def __init__(self):
         self.robot = robot.Robot()
-        self.chassis = WChassis(self.robot.chassis)
-        self.camera = WCamera(self.robot.camera)
-        self.ai = WAI(self.robot)
+        self.chassis = None
+        self.camera = None
+        self.ai = None
     
     def connect(self):
         """
@@ -21,17 +21,26 @@ class WRobot:
         You must be connected to the Robomaster EP Wi-Fi network.
         """
         self.robot.initialize()
+        self.chassis = WChassis(self.robot.chassis)
+        self.camera = WCamera(self.robot.camera)
+        self.ai = WAI(self.robot)
     
     def get_chassis(self):
         """
         Gets the Robomaster EP chassis module to perform translations
         """
+        if not self.robot.is_initialized or self.chassis == None:
+            raise Exception("You must connect to the Robomaster before getting modules.")
+        
         return self.chassis
     
     def get_camera(self):
         """
         Gets the Robomaster EP camera module.
         """
+        if not self.robot.is_initialized or self.camera == None:
+            raise Exception("You must connect to the Robomaster before getting modules.")
+        
         return self.camera
 
     def get_ai(self):
@@ -40,6 +49,9 @@ class WRobot:
 
         This module contains vision related AI functions.
         """
+        if not self.robot.is_initialized or self.ai == None:
+            raise Exception("You must connect to the Robomaster before getting modules.")
+        
         return self.ai
 
     def disconnect(self):
@@ -47,6 +59,9 @@ class WRobot:
         Disconnects from the Robomaster EP.
         """
         self.robot.close()
+        self.chassis = None
+        self.camera = None
+        self.ai = None
     
     def unwrap(self):
         """

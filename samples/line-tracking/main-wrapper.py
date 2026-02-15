@@ -19,20 +19,29 @@ def on_detect_line_callback(line_info):
     theta = line[2]
     curve = line[3]
 
-    # Check if the line is close to the center point
-    theta_abs = math.fabs(theta)
-    line_centered = theta_abs < 5.0
-
-    if x > 0.6:
-        velocity[1] += 1
-    elif x < 0.4:
-        velocity[1] -= 1
-    velocity[2] += theta * 8
-    print(f"X: {x}, Y: {y}, THETA: {theta} (ABS: {theta_abs}), CURVE: {curve}")
+    
 
 def on_detect_line(result: ai.LineTrackerResult):
-    global line_detected, line_centered
+    global line_detected, line_centered, velocity
+
+    line_detected = result.line_detected
+
+    if not result.line_detected:
+        return
+    
     line = result.lines[0]
+    
+    # Check if the line is close to the center point
+    theta_abs = math.fabs(line.theta)
+    line_centered = theta_abs < 5.0
+
+    if line.x > 0.6:
+        velocity[1] += 1
+    elif line.x < 0.4:
+        velocity[1] -= 1
+    velocity[2] += int(line.theta * 8)
+    print(f"X: {line.x}, Y: {line.y}, THETA: {line.theta} (ABS: {theta_abs}), CURVE: {line.curvature}")
+    print(line.theta)
 
 
 def main():
@@ -51,9 +60,9 @@ def main():
     ai = ep_robot.get_ai()
 
     ep_camera.start_stream()
-    vision_result = ep_vision.sub_detect_info(
-        name="line", color="blue", callback=on_detect_line_callback
-    )
+    # vision_result = ep_vision.sub_detect_info(
+    #     name="line", color="blue", callback=on_detect_line_callback
+    # )
     ai.subscribe_to_line_tracker(on_detect_line, line_color="blue")
 
     while running:
