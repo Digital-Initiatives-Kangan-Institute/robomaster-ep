@@ -14,9 +14,9 @@ class WRobot:
     
     def connect(self):
         """
-        Initializes and connects to the Robomaster EP in Direct Connect mode.
+        Connects to the Robomaster EP using Direct Connect mode.
 
-        You must be connected to the Robomasters Wi-Fi network to connect.
+        You must be connected to the Robomaster EP Wi-Fi network.
         """
         self.robot.initialize()
     
