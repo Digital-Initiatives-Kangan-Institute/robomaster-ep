@@ -21,7 +21,6 @@ STATE_STOPPED = 3
 current_state = STATE_STOPPED
 
 def on_detect_line(result: ai.LineTrackerResult):
-    #global line_detected, line_centered, velocity, angle, target_point
     global target_point, target_points
     if not result.line_detected or len(result.lines) < 1:
         target_point = None
@@ -40,11 +39,11 @@ def update_state():
     print(f"X: {target_point.x}, Y: {target_point.y}, Theta: {target_point.theta}")
     
     theta_abs = math.fabs(target_point.theta)
-    if target_point.x > 0.7 or target_point.x < 0.3 or theta_abs > 10.0:
+    if target_point.x > 0.6 or target_point.x < 0.4 or theta_abs > 10.0:
         current_state = STATE_ALIGNING
         return
     
-    current_state = STATE_DRIVING
+    current_state = STATE_DRIVING    
 
 def execute_state():
     global current_state, target_point, angle, velocity
@@ -54,9 +53,9 @@ def execute_state():
     
     if current_state == STATE_ALIGNING:
         if target_point.x > 0.5:
-            velocity[1] += 0.05
+            velocity[1] += 0.1
         elif target_point.x < 0.5:
-            velocity[1] -= 0.05
+            velocity[1] -= 0.1
         angle += target_point.theta
         return
     
