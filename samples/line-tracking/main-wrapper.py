@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, cv2
 
 from wrobomaster import robot, ai
 
@@ -8,41 +8,65 @@ angle = 0.0
 line_detected = False
 line_centered = False
 
-current_line_result = None
+target_points = None
+target_point = None
 
+camera_width = 512
+camera_height = 512
+
+STATE_ALIGNING = 0
+STATE_DRIVING = 2
+STATE_STOPPED = 3
+
+current_state = STATE_STOPPED
 
 def on_detect_line(result: ai.LineTrackerResult):
-    global line_detected, line_centered, velocity, angle, current_line_result
-    current_line_result = result
+    #global line_detected, line_centered, velocity, angle, target_point
+    global target_point, target_points
+    if not result.line_detected or len(result.lines) < 1:
+        target_point = None
+        target_points = None
+    else:
+        target_point = result.lines[0]
+        target_points = result.lines
 
-    line_detected = result.line_detected
-    print(f"Line Detected: {line_detected}")
+def update_state():
+    global current_state, target_point
 
-    if not result.line_detected:
+    if target_point == None:
+        current_state = STATE_STOPPED
         return
     
-    line = result.lines[0]
+    print(f"X: {target_point.x}, Y: {target_point.y}, Theta: {target_point.theta}")
     
-    # Check if the line is close to the center point
-    theta_abs = math.fabs(line.theta)
-    line_centered = theta_abs < 10.0
+    theta_abs = math.fabs(target_point.theta)
+    if target_point.x > 0.7 or target_point.x < 0.3 or theta_abs > 10.0:
+        current_state = STATE_ALIGNING
+        return
+    
+    current_state = STATE_DRIVING
 
-    if line.x > 0.6:
-        velocity[1] += 0.05
-    elif line.x < 0.4:
-        velocity[1] -= 0.05
+def execute_state():
+    global current_state, target_point, angle, velocity
 
-    if not line_centered:
-        angle += line.theta
-
-    print(f"X: {line.x}, Y: {line.y}, THETA: {line.theta} (ABS: {theta_abs}), CURVE: {line.curvature}, CENTER: {line_centered}")
-    print(line.theta)
-
+    if current_state == STATE_STOPPED or target_point == None:
+        return
+    
+    if current_state == STATE_ALIGNING:
+        if target_point.x > 0.5:
+            velocity[1] += 0.05
+        elif target_point.x < 0.5:
+            velocity[1] -= 0.05
+        angle += target_point.theta
+        return
+    
+    if current_state == STATE_DRIVING:
+        velocity[0] += 0.5
 
 def main():
     global velocity, angle, line_detected, line_centered
     pygame.init()
-    screen = pygame.display.set_mode((256, 256))
+    screen = pygame.display.set_mode((camera_width, camera_height))
     clock = pygame.time.Clock()
     running = True
     fill_color = "purple"
@@ -54,7 +78,7 @@ def main():
     ep_vision = ep_robot.unwrap().vision
     ai = ep_robot.get_ai()
 
-    ep_camera.start_stream()
+    ep_camera.start_stream(show_window=False)
     ai.subscribe_to_line_tracker(on_detect_line, line_color="blue")
 
     while running:
@@ -63,10 +87,6 @@ def main():
                 running = False
 
         keys = pygame.key.get_pressed()
-
-        # Automated (Line Tracker)
-        if line_detected and line_centered:
-            velocity[0] += 0.5
 
         # Manual
         if keys[pygame.K_UP]:
@@ -81,6 +101,9 @@ def main():
         if keys[pygame.K_RIGHT]:
             angle += 90
 
+        update_state()
+        execute_state()
+
         chassis.translate(x=velocity[0], y=velocity[1], rotation=angle, duration=0.1)
 
         # Reset velocity and angle (they have been consumed for this tick)
@@ -88,12 +111,31 @@ def main():
         angle = 0.0
 
         screen.fill(fill_color)
+
+        # Draw Start
+        frame = ep_camera.get_cv2_image()
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        resized_frame = cv2.resize(rgb_frame, (camera_width, camera_height))
+        surface = pygame.surfarray.make_surface(resized_frame.swapaxes(0, 1))
+        screen.blit(surface, (0, 0))
+
+        if target_points != None:
+            i = 0
+            for line in target_points:
+                color = (255, 0, 0)
+                if i == 0:
+                    color = (0, 255, 0)
+                pygame.draw.circle(screen, color, (camera_width * line.x, camera_height * line.y), 10)
+                i += 1
+        # Draw End
+
         pygame.display.flip()
         clock.tick(10)
 
     ep_robot.disconnect()
     ep_camera.stop_stream()
     pygame.quit()
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

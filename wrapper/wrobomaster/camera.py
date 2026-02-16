@@ -1,3 +1,5 @@
+import cv2
+
 class WCamera:
     def __init__(self, camera):
         self.camera = camera
@@ -30,7 +32,7 @@ class WCamera:
         """
         self.camera.stop_video_stream()
 
-    def get_cv2_image(self):
+    def get_cv2_image(self) -> cv2.typing.MatLike:
         """
         Gets the OpenCV image buffer.
         """
